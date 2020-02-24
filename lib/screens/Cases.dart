@@ -41,24 +41,15 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    initState2();
-
-
-  }
-  void initState2() async{
-    await _getCases();
-    print("inside initState : ${casesList[0].patient_name}");
+    _getCases();
     listModel = new ListModel(_listKey, casesList);
 
-print("length ${listModel.length}");
   }
     _getCases() async {
     await CasesController.getCases().then((cases) {
       setState(() {
         casesList = cases;
-
       });
-
     });
     print("inside _getCases : ${casesList[0].patient_name}");
   }
@@ -99,21 +90,6 @@ print("length ${listModel.length}");
 //    });
 //  }
 
-  Widget _buildImage() {
-    return new Positioned.fill(
-      bottom: null,
-      child: new ClipPath(
-        clipper: new DialogonalClipper(),
-        child: new Image.asset(
-          'images/birds.jpg',
-          fit: BoxFit.cover,
-          height: _imageHeight,
-          colorBlendMode: BlendMode.srcOver,
-          color: new Color.fromARGB(120, 20, 10, 40),
-        ),
-      ),
-    );
-  }
 
   Widget _buildTopHeader() {
     return new Padding(
@@ -239,7 +215,7 @@ print("length ${listModel.length}");
   Widget _buildTasksList() {
     return new Expanded(
       child: new AnimatedList(
-        initialItemCount: casesList.length,
+        initialItemCount: listModel.length,
         key: _listKey,
         itemBuilder: (context, index, animation) {
           return new CaseRow(
