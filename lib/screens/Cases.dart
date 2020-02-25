@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 void main() => runApp(new CasesUi());
 
 class CasesUi extends StatelessWidget {
-
-
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -33,7 +31,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   List<Case> casesList = [];
   final GlobalKey<AnimatedListState> _listKey =
-  new GlobalKey<AnimatedListState>();
+      new GlobalKey<AnimatedListState>();
   final double _imageHeight = 256.0;
   ListModel listModel;
   bool showOnlyCompleted = false;
@@ -43,30 +41,31 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     _getCases();
     listModel = new ListModel(_listKey, casesList);
-
   }
-    _getCases() async {
+
+  _getCases() async {
     await CasesController.getCases().then((cases) {
       setState(() {
         casesList = cases;
       });
     });
-    print("inside _getCases : ${casesList[0].patient_name}");
+    return casesList;
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Stack(
-        children: <Widget>[
-          _buildTimeline(),
+    return Column(
+      children: <Widget>[
 
+
+          //_buildTimeline(),
+          _buildTasksList2(),
           _buildTopHeader(),
           _buildProfileRow(),
           _buildBottomPart(),
-          _buildFab(),
+          //_buildFab(),
         ],
-      ),
+     
     );
   }
 
@@ -75,8 +74,8 @@ class _MainPageState extends State<MainPage> {
         top: _imageHeight - 100.0,
         right: -40.0,
         child: new AnimatedFab(
-          //onClick: _changeFilterState,
-        ));
+            //onClick: _changeFilterState,
+            ));
   }
 
 //  void _changeFilterState() {
@@ -89,7 +88,6 @@ class _MainPageState extends State<MainPage> {
 //      }
 //    });
 //  }
-
 
   Widget _buildTopHeader() {
     return new Padding(
@@ -120,81 +118,78 @@ class _MainPageState extends State<MainPage> {
       padding: new EdgeInsets.only(left: 16.0, top: 85),
       child: new Row(
         children: <Widget>[
-
           new Padding(
             padding: const EdgeInsets.only(left: 16.0),
-            child: Row (children: <Widget>[Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
               children: <Widget>[
-
-
-                new Text(
-                  'Completed:',
-                  style: new TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w300),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    new Text(
+                      'Completed:',
+                      style: new TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    new Text(
+                      '24',
+                      style: new TextStyle(
+                          fontSize: 30.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ],
                 ),
-                new Text(
-                  '24',
-                  style: new TextStyle(
-                      fontSize: 30.0,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w400),
+                SizedBox(width: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    new Text(
+                      'Waiting:',
+                      style: new TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    new Text(
+                      '37',
+                      style: new TextStyle(
+                          fontSize: 30.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    new Text(
+                      'Active:',
+                      style: new TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    new Text(
+                      '5',
+                      style: new TextStyle(
+                          fontSize: 30.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ],
                 ),
               ],
             ),
-              SizedBox(width: 30),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-
-                  new Text(
-                    'Waiting:',
-                    style: new TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w300),
-                  ),
-                  new Text(
-                    '37',
-                    style: new TextStyle(
-                        fontSize: 30.0,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-
-              SizedBox(width: 30,),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-
-
-                  new Text(
-                    'Active:',
-                    style: new TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w300),
-                  ),
-                  new Text(
-                    '5',
-                    style: new TextStyle(
-                        fontSize: 30.0,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-
-            ],
-            ),
-          )],
+          )
+        ],
       ),
     );
   }
@@ -202,29 +197,58 @@ class _MainPageState extends State<MainPage> {
   Widget _buildBottomPart() {
     return new Padding(
       padding: new EdgeInsets.only(top: _imageHeight),
-      child: new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildMyTasksHeader(),
-          _buildTasksList(),
-        ],
+      child: Expanded(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildMyTasksHeader(),
+            _buildTasksList(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTasksList() {
-    return new Expanded(
-      child: new AnimatedList(
-        initialItemCount: listModel.length,
-        key: _listKey,
-        itemBuilder: (context, index, animation) {
-          return new CaseRow(
-            caseItem: listModel[index],
-            animation: animation,
-          );
-        },
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          AnimatedList(
+            initialItemCount: listModel.length,
+            key: _listKey,
+            itemBuilder: (context, index, animation) {
+              return new CaseRow(
+                caseItem: listModel[index],
+                animation: animation,
+              );
+            },
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildTasksList2() {
+    return new Expanded(
+        child: FutureBuilder(
+      builder: (context, Case) {
+        if (Case.connectionState == ConnectionState.none || Case.data == null) {
+          print('project snapshot data is: ${Case.data}');
+          return Container();
+        }
+        return AnimatedList(
+          initialItemCount: Case.data.length,
+          key: _listKey,
+          itemBuilder: (context, index, animation) {
+            return new CaseRow(
+              caseItem: Case.data[index],
+              animation: animation,
+            );
+          },
+        );
+      },
+      future: _getCases(),
+    ));
   }
 
   Widget _buildMyTasksHeader() {
