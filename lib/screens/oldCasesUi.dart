@@ -1,14 +1,13 @@
 import 'package:mosaic/business/CasesController.dart';
 import 'package:mosaic/models/Case.dart';
-import 'animated_fab.dart';
-import 'diagonal_clipper.dart';
-import 'list_model.dart';
-import 'case_row.dart';
+import 'casesUiWidgets/animated_fab.dart';
+import 'casesUiWidgets/list_model.dart';
+import 'casesUiWidgets/case_row.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(new CasesUi());
+void main() => runApp(new OldCasesUi());
 
-class CasesUi extends StatelessWidget {
+class OldCasesUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -54,19 +53,14 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-
-
-          //_buildTimeline(),
-          _buildTasksList2(),
-          _buildTopHeader(),
-          _buildProfileRow(),
-          _buildBottomPart(),
-          //_buildFab(),
-        ],
-     
-    );
+    return Stack(children: <Widget>[
+          _buildTimeline(),
+      _buildTasksList2(),
+      _buildTopHeader(),
+      _buildProfileRow(),
+      _buildBottomPart(),
+      _buildFab(),
+    ]);
   }
 
   Widget _buildFab() {
@@ -197,14 +191,14 @@ class _MainPageState extends State<MainPage> {
   Widget _buildBottomPart() {
     return new Padding(
       padding: new EdgeInsets.only(top: _imageHeight),
-      child: Expanded(
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildMyTasksHeader(),
-            _buildTasksList(),
-          ],
-        ),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+                child: _buildMyTasksHeader(),
+                //_buildTasksList(),
+
+          ),
+        ],
       ),
     );
   }
@@ -229,26 +223,30 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildTasksList2() {
-    return new Expanded(
-        child: FutureBuilder(
-      builder: (context, Case) {
-        if (Case.connectionState == ConnectionState.none || Case.data == null) {
-          print('project snapshot data is: ${Case.data}');
-          return Container();
-        }
-        return AnimatedList(
-          initialItemCount: Case.data.length,
-          key: _listKey,
-          itemBuilder: (context, index, animation) {
-            return new CaseRow(
-              caseItem: Case.data[index],
-              animation: animation,
+    return Column(
+      children: <Widget>[
+        new Expanded(
+            child: FutureBuilder(
+          builder: (context, Case) {
+            if (Case.connectionState == ConnectionState.none || Case.data == null) {
+              print('project snapshot data is: ${Case.data}');
+              return Container();
+            }
+            return AnimatedList(
+              initialItemCount: Case.data.length,
+              key: _listKey,
+              itemBuilder: (context, index, animation) {
+                return new CaseRow(
+                  caseItem: Case.data[index],
+                  animation: animation,
+                );
+              },
             );
           },
-        );
-      },
-      future: _getCases(),
-    ));
+          future: _getCases(),
+        )),
+      ],
+    );
   }
 
   Widget _buildMyTasksHeader() {
@@ -271,14 +269,26 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildTimeline() {
-    return new Positioned(
-      top: 0.0,
-      bottom: 0.0,
-      left: 32.0,
-      child: new Container(
-        width: 1.0,
-        color: Colors.grey[300],
-      ),
-    );
+    return Positioned(
+        top: 0.0,
+        bottom: 0.0,
+        left: 32.0,
+        child: new Container(
+          width: 1.0,
+          color: Colors.grey[300],
+        ),
+      );
   }
+//  Widget _buildTimeline() {
+//    return
+//      new Container(
+//        top: 0.0,
+//        bottom: 0.0,
+//        left: 32.0,
+//        child: new Container(
+//          width: 1.0,
+//          color: Colors.grey[300],
+//        ),
+//      );
+//  }
 }

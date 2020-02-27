@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mosaic/business/GeneralServices.dart';
+import 'package:mosaic/business/Services.dart';
 import 'package:mosaic/business/Logger.dart';
 import 'package:mosaic/business/UserController.dart';
 

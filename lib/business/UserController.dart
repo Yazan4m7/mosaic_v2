@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mosaic/business/Services.dart';
 import 'Logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:mosaic/screens/Cases.dart';
+import 'package:mosaic/screens/casesUi.dart';
 
 class UserController{
 
@@ -28,7 +29,7 @@ class UserController{
       WriteToFile.write('Prefs set successfuly for ${prefs.get('user_name')}');
       Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CasesUi()));
+          MaterialPageRoute(builder: (context) => MainPage()));
       return true;
     }
     else {
