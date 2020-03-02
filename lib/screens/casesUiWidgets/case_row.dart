@@ -12,6 +12,7 @@ class CaseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("building");
     return Slidable(
       actionPane: SlidableStrechActionPane(),
       actionExtentRatio: 0.25,

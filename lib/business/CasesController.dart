@@ -17,8 +17,7 @@ class CasesController {
     String permissions = "(" + prefs.get('permissions_ids') + ")";
     var map = Map<String, dynamic>();
     map['action'] = _GET_ALL_ACTION;
-    map['query'] = "SELECT * from tasks ORDER BY id DESC";
-    //WHERE current_status in $permissions
+    map['query'] = "SELECT * from tasks WHERE current_status in $permissions ORDER BY id DESC";
     final response = await http.post(ROOT, body: map);
     WriteToFile.write('get all response body: ${response.body}');
 
@@ -110,5 +109,9 @@ class CasesController {
 
   static void initiateApplicationUpdate() {
 
+  }
+
+  static void updateCaseStatue(Case caseItem){
+      print("code to update case status goes here");
   }
 }
