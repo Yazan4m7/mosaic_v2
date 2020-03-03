@@ -114,4 +114,8 @@ class CasesController {
   static void updateCaseStatue(Case caseItem){
       print("code to update case status goes here");
   }
+
+  static casesGetter() async {
+    return CasesController.getCases();
+  }
 }
