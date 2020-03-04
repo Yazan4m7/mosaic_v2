@@ -1,4 +1,5 @@
 import 'package:mosaic/models/Case.dart';
+import 'package:mosaic/models/Permission.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 class GeneralServices {
@@ -23,9 +24,20 @@ class GeneralServices {
   return prefs;
   }
 
-  static List<Case> parseResponse(String responseBody) {
+  static List<Case> parseCasesResponse(String responseBody) {
+    print("json.dcoding");
     var parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    print("parsed.map");
     parsed = parsed.map<Case>((json) => Case.fromJson(json)).toList();
+    print("returning map");
+    return parsed;
+  }
+  static List<Permission> parsePermissionsResponse(String responseBody) {
+
+    var parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+
+    parsed = parsed.map<Permission>((json) => Permission.fromJson(json)).toList();
+
     return parsed;
   }
 }

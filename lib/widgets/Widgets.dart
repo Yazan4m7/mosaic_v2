@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mosaic/business/Logger.dart';
 import 'package:mosaic/models/Case.dart';
 import 'package:mosaic/screens/previewCase.dart';
-import 'package:mosaic/screens/viewSingleCase.dart';
 class Widgets{
 
  static Drawer mosaicDrawer() {
@@ -88,7 +87,7 @@ class Widgets{
      subtitle: Row(
        children: <Widget>[
          Expanded(
-             child: Text(caseItem.stage.toUpperCase(),
+             child: Text(caseItem.doctor_id.toString(),
                  style: TextStyle(color: Colors.grey))),
        ],
      ),
@@ -96,7 +95,8 @@ class Widgets{
    );
  }
 
- static FadeTransition makeCard(Case caseItem, Animation animation){
+ static FadeTransition makeCard(Case caseItem, Animation animation,BuildContext context){
+
    return FadeTransition(
      opacity: animation,
      child: new SizeTransition(
@@ -110,10 +110,10 @@ class Widgets{
                child: makeListTile(caseItem),
            ),
          ),
-         onTap:(){
-           Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewCase(caseItem: caseItem,)));
-
-       ),
+         onTap:() {
+           Navigator.of(context).push(MaterialPageRoute(
+               builder: (context) => PreviewCase(caseItem: caseItem,)));
+         }),
      ),
    );
  }

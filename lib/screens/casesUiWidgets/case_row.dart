@@ -71,8 +71,8 @@ class CaseRow extends StatelessWidget {
           color: Colors.red,
           icon: Icons.play_circle_outline,
           onTap: () {
-            if (int.parse(caseItem.stage)==0)
-              CasesController.updateToActive(caseItem.id, caseItem.current_status, caseItem.stage);
+            if (int.parse(caseItem.current_status)==0)
+              CasesController.updateToActive(caseItem.id, caseItem.current_status, caseItem.current_status);
             else
               CasesController.updateToDone(caseItem.id, caseItem.current_status);
             },

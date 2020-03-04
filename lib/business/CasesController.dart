@@ -8,21 +8,21 @@ import 'Services.dart';
 
 
 class CasesController {
-  static const ROOT = 'http://manshore.com/services_actions.php';
-  static const _GET_ALL_ACTION = 'GET_ALL';
-
+  static const ROOT = 'http://10.0.2.2/flutter_api.php';
 
   static Future<List<Case>> getCases() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String permissions = "(" + prefs.get('permissions_ids') + ")";
+    String permissions = prefs.get('permissionsIds') ;
     var map = Map<String, dynamic>();
-    map['action'] = _GET_ALL_ACTION;
-    map['query'] = "SELECT * from tasks WHERE current_status in $permissions ORDER BY id DESC";
+    map['action'] = "GET";
+    map['query'] = "SELECT * from orders WHERE current_status in (1,2,3) ORDER BY id DESC";
+    print(map['query']);
+    print("list: " );
     final response = await http.post(ROOT, body: map);
     WriteToFile.write('get all response body: ${response.body}');
-
-    List<Case> list = GeneralServices.parseResponse(response.body);
-
+    print("list: " );
+    List<Case> list = GeneralServices.parseCasesResponse(response.body);
+    print("list2: " +list.toString());
     return list;
   }
 

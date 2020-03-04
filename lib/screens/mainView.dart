@@ -1,16 +1,12 @@
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mosaic/business/CasesController.dart';
-import 'package:mosaic/business/Logger.dart';
-import 'package:mosaic/models/Case.dart';
 import 'package:mosaic/screens/casesUiWidgets/list_model.dart';
-import 'package:mosaic/screens/viewSingleCase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:mosaic/widgets/Widgets.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(new MainView());
 
-class MyApp extends StatelessWidget {
+class MainView extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -19,16 +15,13 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
           primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'Raleway'),
       home: new ListPage(title: 'Cases'),
-      // home: DetailPage(),
     );
   }
 }
 
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title}) : super(key: key);
-
-final String title;
-
+  final String title;
   @override
   _ListPageState createState() => _ListPageState();
 }
@@ -38,7 +31,8 @@ class _ListPageState extends State<ListPage>
   Animation<double> animation;
   static Future casesList;
   static TabController _tabController;
-  final GlobalKey<AnimatedListState> _listKey = new GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> _listKey =
+      new GlobalKey<AnimatedListState>();
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   ListModel listModel;
   SharedPreferences prefs;
@@ -117,7 +111,8 @@ class _ListPageState extends State<ListPage>
                     itemBuilder: (context, index, animation) {
                       print("inital item count ${casesList.data.length}");
                       print("index $index");
-                      return Widgets.makeCard(casesList.data[index], animation);
+                      return Widgets.makeCard(
+                          casesList.data[index], animation, context);
                     });
               }),
           FutureBuilder(
@@ -136,7 +131,8 @@ class _ListPageState extends State<ListPage>
                     //key: _listKey,
                     itemBuilder: (context, index, animation) {
                       //if Waiting
-                      return Widgets.makeCard(casesList.data[index], animation);
+                      return Widgets.makeCard(
+                          casesList.data[index], animation, context);
                     });
               })
         ],

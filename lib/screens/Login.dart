@@ -104,7 +104,7 @@ class Login extends StatelessWidget {
                         onPressed: () {
                           UserController.logIn(usernameController.text.trim(),
                               passwordController.text.trim(), context);
-                        }, //since this is only a UI app
+                        },
                         child: Text(
                           'SIGN IN',
                           style: TextStyle(
