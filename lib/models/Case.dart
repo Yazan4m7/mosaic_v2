@@ -1,6 +1,6 @@
 class Case {
-  int id;
-  int order_id;
+  String id;
+  String order_id;
   String patient_name;
   DateTime deliver_date;
   String milled;
@@ -39,29 +39,29 @@ class Case {
     this.created_at,
     this.updated_at});
 
-  factory Case.fromJson(Map<String, dynamic> json) {
-    print("from json" + json['id']);
+   factory Case.jsonToCase (Map<String, dynamic> json) {
     Case caseItem = Case();
-    caseItem.id=json['id'];
-//        order_id: int.parse(json['order_id']),
-//        patient_name: json['patient_name'] as String,
-//        deliver_date: DateTime.parse(json['deliver_date']),
-//        milled: json['milled'],
-//        milled_by: json['milled_by'] as String,
-//        current_status: json['current_status'] as String,
-//        total_status: json['total_status'] as String,
-//        hidden: json['hidden'],
-//        made_by: int.parse(json['made_by']),
-//        note: json['note'],
-//        doctor_id: int.parse(json['doctor_id']),
-//        lab_id: int.parse(json['lab_id']),
-//        service_id: int.parse(json['service_id']),
-//        app_id: int.parse(json['app_id']),
-//        created_at: json['created_at'],
-//        deleted_at: json['deleted_at'],
-//        created_by: json['created_by'],
-//        updated_at: json['updated_at']);
-  print("return from fromJson");
+
+    caseItem.id= json['id'];
+    caseItem.order_id= json['order_id'] ;
+    caseItem.deliver_date= DateTime.parse(json['deliver_date']);
+    caseItem.milled= json['milled'];
+    caseItem.milled_by= json['milled_by'] as String;
+    caseItem.current_status= json['current_status'] as String;
+    caseItem.total_status= json['total_status'] as String;
+    caseItem.hidden= json['hidden'];
+    caseItem.made_by= json['made_by'];
+    caseItem.note= json['note'];
+    print('doc id');
+    caseItem.doctor_id= int.parse(json['doctor_id']);
+    caseItem.lab_id= json['lab_id'];
+//        service_id: int.parse(json[13]);
+//        app_id: int.parse(json[14]);
+//        created_at: json[15];
+//        deleted_at: json[16];
+//        created_by: json[17];
+//        updated_at: json[18;
+
     return caseItem;
   }
 }
