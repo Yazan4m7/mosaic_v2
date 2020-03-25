@@ -1,10 +1,26 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:mosaic/appointment/appointment_model.dart';
+import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/business/Logger.dart';
-import 'package:mosaic/models/Case.dart';
-import 'package:mosaic/screens/previewCase.dart';
+import 'package:mosaic/business/Services.dart';
+import 'package:mosaic/appointment/preview_appointment.dart';
+import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/doctor/doctor.dart';
+import 'package:mosaic/cases/preview_case.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Widgets{
+  static String drawerTitle = "Nothing is here yet :)";
+  static setUsername()async {
+    SharedPreferences prefs = await Services.getSharedPreferencesInstance();
+    if (prefs.get('name')!=null)
+      drawerTitle = prefs.get('name');
+  }
 
  static Drawer mosaicDrawer() {
+   setUsername();
    return Drawer(
 
      child:new ListView(
@@ -14,7 +30,7 @@ class Widgets{
            child: DrawerHeader(
              child: Padding(
                padding: const EdgeInsets.fromLTRB(0,60,0.0,0),
-               child: Text('Nothing is here yet.', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,color: Colors.white)),
+               child: Text(drawerTitle, style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,color: Colors.white)),
              ),
              decoration: BoxDecoration(
                  color: Colors.black87
@@ -26,7 +42,7 @@ class Widgets{
          new ListTile(
              title: Text("Logs"),
              trailing: Icon(Icons.folder),
-             onTap:(){ WriteToFile.openLogs();}
+             onTap:(){ Logger.openLogs();}
          )
        ],
      ),
@@ -61,58 +77,128 @@ class Widgets{
      ),
    ));}
 
- static ListTile makeListTile(Case caseItem){
+ static ListTile makeCaseListTile(Case caseItem,Doctor doctor,BuildContext context, VoidCallback refreshLocalList){
+   String phase='';
+
+         Logger.log("made by ${caseItem.madeBy}");
+
+     switch(caseItem.currentStatus){
+       case '0' : phase = 'Desgin'; break;
+       case '1' : phase = 'Milling'; break;
+       case '2' : phase = 'Furnace/ Sintering'; break;
+       case '3' : phase = 'Finishing/ Build up'; break;
+       case '4' : phase = 'QA'; break;
+       case '5' : phase = 'Delivery'; break;
+   }
+
   return ListTile(
-     contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+     contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 3.0),
      title: Row(
        children: <Widget>[
          Container(
-           width: 150,
-           child: Text(
-             caseItem.patient_name,
+           width: screenAwareSize(150, context),
+           child: Text(caseItem.patientName==null? "N/A":
+             caseItem.patientName,
              style:
-             TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+             TextStyle(color: Colors.white, fontWeight: FontWeight.bold),textAlign: TextAlign.right
+           ),
+         ),Container(
+           width: 10,
+           child: Text(
+               ' | ',
+               style:
+               TextStyle(color: Colors.white, fontWeight: FontWeight.bold),textAlign: TextAlign.right
            ),
          ),
          Container(
-           width: 90,
-           child: Text(
-             " | " + caseItem.doctor_id.toString(),
+           width: screenAwareSize(150, context),
+           child: Text(doctor==null? "NA" :
+              doctor.name,
              style:
-             TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+             TextStyle(color: Colors.white, fontWeight: FontWeight.bold),textAlign: TextAlign.right
            ),
          ),
        ],
      ),
      subtitle: Row(
        children: <Widget>[
-         Expanded(
-             child: Text(caseItem.doctor_id.toString(),
-                 style: TextStyle(color: Colors.grey))),
+            Expanded(
+               child: Padding(
+                 padding: const EdgeInsets.only(top:4.0),
+                 child: Text(phase,
+                     style: TextStyle(color: Colors.grey)),
+               )),
+
        ],
      ),
-     onTap: () {},
+     onTap: () {Navigator.of(context).push(MaterialPageRoute(
+         builder: (context) => PreviewCase(caseItem: caseItem,doctor: doctor,refreshLocalList: refreshLocalList)));},
    );
  }
 
- static FadeTransition makeCard(Case caseItem, Animation animation,BuildContext context){
+  static ListTile makeAppointmentListTile(Appointment appointmentItem,Doctor doctor,BuildContext context,VoidCallback refreshLocalList){
+    String phase='';
+    String date = appointmentItem.date==null ? "NA":appointmentItem.date;
+    String time =appointmentItem.time == null ? "NA" : appointmentItem.time.substring(0,4);
+    String doctorName= doctor==null ? "N/A":doctor.name;
+
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 3.0),
+
+         title: Row(
+           children: <Widget>[
+             Flexible(
+
+                child:Text( time+ " - ",
+                    style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+             Flexible(
+
+               child:Text(doctorName,
+                 style:
+                 TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+               ),
+             ),
+           ],
+         ),
+
+      subtitle: Row(
+        children: <Widget>[
+          Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top:4.0),
+                child: Text(date,
+                    style: TextStyle(color: Colors.grey)),
+              )),
+
+        ],
+      ),
+      onTap: () {Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PreviewAppointment(appointmentItem: appointmentItem,doctor: doctor,refreshFromLocalList: refreshLocalList,)));},
+    );
+  }
+
+ static FadeTransition makeCard(dynamic object,Doctor doctor, Animation animation,BuildContext context, VoidCallback refreshLocalList){
 
    return FadeTransition(
      opacity: animation,
      child: new SizeTransition(
        sizeFactor: animation,
        child: InkWell(
-         child: new Card(
-           elevation: 8.0,
-           margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-           child: Container(
-             decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-               child: makeListTile(caseItem),
+         child: Container(
+           height: 80,
+           child: new Card(
+             elevation: 4.0,
+             margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+             child: Container(
+               decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
+                 child: object is Case ? makeCaseListTile(object,doctor,context,refreshLocalList):makeAppointmentListTile(object,doctor,context,refreshLocalList),
+             ),
            ),
          ),
          onTap:() {
-           Navigator.of(context).push(MaterialPageRoute(
-               builder: (context) => PreviewCase(caseItem: caseItem,)));
          }),
      ),
    );
@@ -154,4 +240,16 @@ class Widgets{
 // }
 
 //bottomNavigationBar: makeBottom,
+  static  loadingCircle(String label){
+    return Center(
+      child: Column(
+        mainAxisAlignment:MainAxisAlignment.center,
+        children: <Widget>[
+
+          CircularProgressIndicator (valueColor: AlwaysStoppedAnimation<Color>(
+              Colors.white)),SizedBox(height: 8),
+          Text(label,style: TextStyle(color: Colors.white),)],
+      ),
+    );
+  }
 }

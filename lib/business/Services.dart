@@ -1,15 +1,18 @@
-import 'package:mosaic/models/Case.dart';
-import 'package:mosaic/models/Permission.dart';
+
+import 'package:http/http.dart' as http;
+import 'file:///D:/officalProject%20-%20Copy/mosaic/lib/cases/Case.dart';
+import 'file:///D:/officalProject%20-%20Copy/mosaic/lib/user/Permission.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-class GeneralServices {
+class Services {
 
 
 
   static SharedPreferences prefs;
 
-  static getDataFromSharedPreferences(String key) async{
-    if(prefs==null){ prefs = initialize() ;}
+  static String getDataFromSharedPreferences(String key) {
+    if(prefs==null){ initialize() ;}
+    print ("Data from prefs : ${prefs.getString(key)}");
     return prefs.getString(key).toString();
   }
   static setDataToSharedPreferences(String key,String value) async{
@@ -24,13 +27,48 @@ class GeneralServices {
   return prefs;
   }
 
-  static List<Case> parseCasesResponse(String responseBody) {
-    print("json.dcoding");
-    var parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-    print("parsed.map");
-    parsed = parsed.map<Case>((json) => Case.fromJson(json)).toList();
-    print("returning map");
+
+  static Future<List<Case>> do2() async {
+    const ROOT = 'http://10.0.2.2/flutter_api.php';
+    var map = Map<String, dynamic>();
+    map['action'] = "GET";
+    map['query'] =
+    "SELECT * from orders WHERE current_status in (1,2,3) ORDER BY id DESC";
+    print(map['query']);
+
+    final response = await http.post(ROOT, body: map);
+
+    print('get all response body: ${response.body}');
+    List<dynamic> list= List<dynamic>();
+    var parsed = json.decode(response.body);
+    print("parsed map ${parsed[1].runtimeType}");
+    for(int i=0;i<parsed.length;i++){
+      Case caseItem =Case.fromJson(parsed[i]);
+      print ('parsed $caseItem');
+      list.add(caseItem);
+      print ('case added');
+    }
+    //parsed = parsed.map<Case>((json) => Case.jsonToCase(json)).toList();
+    print("returning list $list");
     return parsed;
+    //List<Case> list = GeneralServices.parseCasesResponse(response.body);
+    //print();
+    //return list;
+  }
+  static List<Case> parseCasesResponse(String responseBody) {
+    do2();
+//    List<dynamic> list=List<dynamic>();
+//    var parsed = json.decode(responseBody);
+//    print("parsed map ${parsed[1].runtimeType}");
+//    for(int i=0;i<parsed.length;i++){
+//      Case caseItem =Case.fromJson(parsed[i]);
+//      print ('parsed $caseItem');
+//      list.add(caseItem);
+//      print ('case added');
+//    }
+//    //parsed = parsed.map<Case>((json) => Case.jsonToCase(json)).toList();
+//    print("returning list $list");
+//    return list;
   }
   static List<Permission> parsePermissionsResponse(String responseBody) {
 

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mosaic/business/Services.dart';
 import 'package:mosaic/business/Logger.dart';
-import 'package:mosaic/business/UserController.dart';
+import 'package:mosaic/user/User_Controller.dart';
 
 class Login extends StatelessWidget {
 
@@ -13,7 +12,6 @@ class Login extends StatelessWidget {
     //var scaffoldKey = GlobalKey<ScaffoldState>();
     ScreenUtil.instance = ScreenUtil()..init(context);
     return MaterialApp(
-
       theme: ThemeData(primaryColor: Colors.lightBlue),
       home: Scaffold(
         appBar: AppBar(backgroundColor: Colors.white,iconTheme: new IconThemeData(color: Colors.black)),
@@ -38,7 +36,7 @@ class Login extends StatelessWidget {
               new ListTile(
                 title: Text("Logs"),
                 trailing: Icon(Icons.folder),
-                onTap:(){ WriteToFile.openLogs();}
+                onTap:(){ Logger.openLogs();}
               )
             ],
           ),
@@ -46,7 +44,6 @@ class Login extends StatelessWidget {
 
         body: Stack(
           children: <Widget>[
-            Text("hiiiiiiii", style: TextStyle(color: Colors.red),),
 
             Container(
               width: MediaQuery.of(context).size.width,

@@ -1,52 +1,72 @@
-import 'package:mosaic/business/CasesController.dart';
-import 'package:mosaic/screens/casesUiWidgets/list_model.dart';
+import 'dart:collection';
+import 'package:mosaic/business/Logger.dart';
+import 'case_controller.dart';
+import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/doctor/doctor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:mosaic/widgets/Widgets.dart';
 
-void main() => runApp(new MainView());
+import '../doctor/doctors_controller.dart';
 
-class MainView extends StatelessWidget {
+void main() => runApp(new CasesMainView());
+
+class CasesMainView extends StatelessWidget {
+  CasesMainView({Key key}) : super(key: key);
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'MOSAIC',
       theme: new ThemeData(
-          primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'Raleway'),
-      home: new ListPage(title: 'Cases'),
+
+          primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'VIP-Hakm-Regular-2016.ttf'),
+      home: new ListPage(title: 'Appointments',key: key),
     );
   }
 }
 
+final key = new GlobalKey<ListPageState>();
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title}) : super(key: key);
   final String title;
   @override
-  _ListPageState createState() => _ListPageState();
+  ListPageState createState() => ListPageState();
 }
 
-class _ListPageState extends State<ListPage>
+class ListPageState extends State<ListPage>
     with SingleTickerProviderStateMixin {
   Animation<double> animation;
-  static Future casesList;
+  static Future<List<Case>>  casesList;
   static TabController _tabController;
-  final GlobalKey<AnimatedListState> _listKey =
-      new GlobalKey<AnimatedListState>();
-  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
-  ListModel listModel;
+//   GlobalKey<AnimatedListState> _listKey =
+//      new GlobalKey<AnimatedListState>();
+   GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   SharedPreferences prefs;
+  static HashMap<String,Doctor> doctors = HashMap<String,Doctor>();
 
-  void initSharedPrefs() async {
+  void initDataFetching() async {
     prefs = await SharedPreferences.getInstance();
+  }
+
+  static setDoctorsList(HashMap<String,Doctor> doctorsList) async {
+    doctors = doctorsList;
   }
 
   @override
   void initState() {
     super.initState();
-    casesList = CasesController.casesGetter();
-    initSharedPrefs();
+    refreshLocalList();
+    casesList=CasesController.getCases();
     _tabController = new TabController(length: 2, vsync: this);
+  }
+   refreshLocalList() async {
+     Logger.log("Refrishing list");
+     setState(() {casesList=CasesController.getLocalList();});
+   }
+  refreshListFromDB() async {
+    Logger.log("Refrishing list");
+    setState(() {casesList=CasesController.getCases();});
   }
 
   Widget build(BuildContext context) {
@@ -82,11 +102,17 @@ class _ListPageState extends State<ListPage>
         title: Text("Cases"),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              refreshListFromDB();
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.list),
             onPressed: () {
               _drawerKey.currentState.openDrawer();
             },
-          )
+          ),
         ],
       ),
       key: _drawerKey,
@@ -103,16 +129,19 @@ class _ListPageState extends State<ListPage>
                       'snapshot data is: ${casesList.data} and connecting is ${casesList.connectionState}');
                   return Container();
                 }
-                print(casesList.data.length);
+                print("cases list length${casesList.data.length}");
                 return AnimatedList(
                     scrollDirection: Axis.vertical,
                     initialItemCount: casesList.data.length,
-                    key: _listKey,
+                    //key: _listKey,
                     itemBuilder: (context, index, animation) {
-                      print("inital item count ${casesList.data.length}");
-                      print("index $index");
-                      return Widgets.makeCard(
-                          casesList.data[index], animation, context);
+                      print("doctor id is  ${casesList.data[index].toString()}");
+                      if (isActive(casesList.data[index])) {
+                        return Widgets.makeCard(
+                            casesList.data[index],
+                            DoctorsController.getDoctorById(
+                            int.parse(casesList.data[index].doctorId)), animation, context,()=> refreshLocalList());
+                      }else{return SizedBox(width: 0,height: 0);}
                     });
               }),
           FutureBuilder(
@@ -130,14 +159,24 @@ class _ListPageState extends State<ListPage>
                     initialItemCount: casesList.data.length,
                     //key: _listKey,
                     itemBuilder: (context, index, animation) {
-                      //if Waiting
-                      return Widgets.makeCard(
-                          casesList.data[index], animation, context);
+                      print("index ${casesList.data[index].toString()}");
+                      if (!isActive(casesList.data[index])) {
+                        return Widgets.makeCard(
+                            casesList.data[index],
+                            DoctorsController.getDoctorById(
+                                int.parse(casesList.data[index].doctorId)), animation, context,refreshLocalList);
+                      }else{return SizedBox(width: 0,height: 0);}
                     });
               })
+
+
         ],
       ),
-      bottomNavigationBar: Widgets.mainViewBottomBar(),
     );
+  }
+  bool isActive(Case caseItem){
+
+    if(caseItem.madeBy != null && int.parse(caseItem.madeBy)!=0)return true;
+     return false;
   }
 }
