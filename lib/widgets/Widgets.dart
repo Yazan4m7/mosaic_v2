@@ -1,18 +1,21 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:mosaic/Utils/themes_constans.dart';
 import 'package:mosaic/appointment/appointment_model.dart';
 import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/business/Logger.dart';
 import 'package:mosaic/business/Services.dart';
 import 'package:mosaic/appointment/preview_appointment.dart';
-import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/cases/case_model.dart';
 import 'package:mosaic/doctor/doctor.dart';
 import 'package:mosaic/cases/preview_case.dart';
+import 'package:mosaic/widgets/animator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Widgets{
   static String drawerTitle = "Nothing is here yet :)";
+
   static setUsername()async {
     SharedPreferences prefs = await Services.getSharedPreferencesInstance();
     if (prefs.get('name')!=null)
@@ -77,10 +80,9 @@ class Widgets{
      ),
    ));}
 
- static ListTile makeCaseListTile(Case caseItem,Doctor doctor,BuildContext context, VoidCallback refreshLocalList){
+ static ListTile makeCaseListTile(Case caseItem,Doctor doctor,BuildContext context, VoidCallback refreshLocalList,Function(String msg) showInSnackBar){
    String phase='';
 
-         Logger.log("made by ${caseItem.madeBy}");
 
      switch(caseItem.currentStatus){
        case '0' : phase = 'Desgin'; break;
@@ -100,7 +102,7 @@ class Widgets{
            child: Text(caseItem.patientName==null? "N/A":
              caseItem.patientName,
              style:
-             TextStyle(color: Colors.white, fontWeight: FontWeight.bold),textAlign: TextAlign.right
+             TextStyle(color: ThemeConstants.listTileTextColor, fontWeight: FontWeight.bold),textAlign: TextAlign.right
            ),
          ),Container(
            width: 10,
@@ -132,11 +134,11 @@ class Widgets{
        ],
      ),
      onTap: () {Navigator.of(context).push(MaterialPageRoute(
-         builder: (context) => PreviewCase(caseItem: caseItem,doctor: doctor,refreshLocalList: refreshLocalList)));},
+         builder: (context) => PreviewCase(caseItem: caseItem,doctor: doctor,refreshLocalList: refreshLocalList,showInSnackBar: showInSnackBar,)));},
    );
  }
 
-  static ListTile makeAppointmentListTile(Appointment appointmentItem,Doctor doctor,BuildContext context,VoidCallback refreshLocalList){
+  static ListTile makeAppointmentListTile(Appointment appointmentItem,Doctor doctor,BuildContext context,VoidCallback refreshLocalList,Function(String msg) showInSnackBar){
     String phase='';
     String date = appointmentItem.date==null ? "NA":appointmentItem.date;
     String time =appointmentItem.time == null ? "NA" : appointmentItem.time.substring(0,4);
@@ -151,14 +153,14 @@ class Widgets{
 
                 child:Text( time+ " - ",
                     style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    TextStyle(color: ThemeConstants.listTileTextColor ,fontWeight: FontWeight.bold),
                 ),
               ),
              Flexible(
 
                child:Text(doctorName,
                  style:
-                 TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                 TextStyle(color: ThemeConstants.listTileTextColor, fontWeight: FontWeight.bold),
                ),
              ),
            ],
@@ -176,11 +178,11 @@ class Widgets{
         ],
       ),
       onTap: () {Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => PreviewAppointment(appointmentItem: appointmentItem,doctor: doctor,refreshFromLocalList: refreshLocalList,)));},
+          builder: (context) => PreviewAppointment(appointmentItem: appointmentItem,doctor: doctor,refreshFromLocalList: refreshLocalList,showInSnackBar: showInSnackBar,)));},
     );
   }
 
- static FadeTransition makeCard(dynamic object,Doctor doctor, Animation animation,BuildContext context, VoidCallback refreshLocalList){
+ static FadeTransition makeCard(dynamic object,Doctor doctor, Animation animation,BuildContext context, VoidCallback refreshLocalList,Function(String msg) showInSnackBar){
 
    return FadeTransition(
      opacity: animation,
@@ -188,13 +190,31 @@ class Widgets{
        sizeFactor: animation,
        child: InkWell(
          child: Container(
-           height: 80,
-           child: new Card(
-             elevation: 4.0,
-             margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-             child: Container(
-               decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-                 child: object is Case ? makeCaseListTile(object,doctor,context,refreshLocalList):makeAppointmentListTile(object,doctor,context,refreshLocalList),
+
+           child: WidgetANimator(
+             Column(
+
+               children: <Widget>[
+                 new Card(
+
+                   elevation: 0.0,
+
+                   margin: new EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
+                   child: Container(
+                     decoration: BoxDecoration(color: ThemeConstants.mainBackground,
+                       border: Border.all(
+                         color: ThemeConstants.mainBackground,
+                         width: 0,
+                       ),
+                     ),
+                       child: object is Case ? makeCaseListTile(object,doctor,context,refreshLocalList,showInSnackBar):makeAppointmentListTile(object,doctor,context,refreshLocalList,showInSnackBar),
+                   ),
+                 ),   Container(width: MediaQuery.of(context).size.width-80,
+
+                   height: 0.4,
+                   color: Colors.grey,
+                 ),
+               ],
              ),
            ),
          ),

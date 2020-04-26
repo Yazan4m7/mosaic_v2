@@ -2,24 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:mosaic/appointment/appointments_controller.dart';
 import 'package:mosaic/business/Queries.dart';
+import 'package:mosaic/cases/new_case.dart';
 import 'appointment_model.dart';
 import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/doctor/doctor.dart';
-import 'package:mosaic/Utils/Custom_Font_Style.dart';
+import 'package:mosaic/Utils/font_style.dart';
 import 'appointments_view.dart';
-
 
 void main() => runApp(new PreviewAppointment());
 
 class PreviewAppointment extends StatefulWidget {
   final Appointment appointmentItem;
   final Doctor doctor;
-   final VoidCallback refreshFromLocalList;
-
-  const PreviewAppointment({Key key, this.appointmentItem, this.doctor,this.refreshFromLocalList})
+  final VoidCallback refreshFromLocalList;
+  final Function(String msg) showInSnackBar;
+  const PreviewAppointment(
+      {Key key,
+      this.appointmentItem,
+      this.doctor,
+      this.refreshFromLocalList,
+      this.showInSnackBar})
       : super(key: key);
   @override
-  _PreviewAppointmentState createState() => _PreviewAppointmentState(this.refreshFromLocalList);
+  _PreviewAppointmentState createState() =>
+      _PreviewAppointmentState(this.refreshFromLocalList);
 }
 
 class _PreviewAppointmentState extends State<PreviewAppointment> {
@@ -35,7 +41,6 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
       title: 'MOSAIC',
       theme: new ThemeData(
         primaryColor: Color.fromRGBO(58, 66, 86, 1.0),
-
       ),
       home: Container(
         decoration: BoxDecoration(
@@ -81,16 +86,18 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                                         MediaQuery.of(context).size.width / 2 -
                                             20,
                                     child: Text("Doctor Name",
-                                        style: CustomTextStyle
-                                            .previewCaseSmallFont(context))),
+                                        style:
+                                            MyFontStyles.headlinesGreyFontStyle(
+                                                context))),
                                 Container(
                                     width:
                                         MediaQuery.of(context).size.width / 2 -
                                             20,
                                     alignment: Alignment.topLeft,
-                                    child: Text(widget.doctor.name?? "N/A",
-                                        style: CustomTextStyle
-                                            .previewCaseLargeFont(context))),
+                                    child: Text(widget.doctor.name ?? "N/A",
+                                        style:
+                                            MyFontStyles.titlesWhiteFontStyle(
+                                                context))),
                               ],
                             ),
                             // SizedBox(width: screenAwareSize(10, context)),
@@ -105,17 +112,18 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                                   Container(
                                       alignment: Alignment.topLeft,
                                       child: Text("Date",
-                                          style: CustomTextStyle
-                                              .previewCaseSmallFont(context))),
+                                          style: MyFontStyles
+                                              .headlinesGreyFontStyle(
+                                                  context))),
                                   Container(
                                       alignment: Alignment.topLeft,
                                       child: Text(
-
                                           widget.doctor == null
                                               ? "NA"
                                               : widget.appointmentItem.date,
-                                          style: CustomTextStyle
-                                              .previewCaseLargeFont(context)))
+                                          style:
+                                              MyFontStyles.titlesWhiteFontStyle(
+                                                  context)))
                                 ],
                               ),
                             )
@@ -126,13 +134,13 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                           children: <Widget>[
                             Container(
                                 child: Text("Time",
-                                    style: CustomTextStyle.previewCaseSmallFont(
+                                    style: MyFontStyles.headlinesGreyFontStyle(
                                         context))),
                             Container(
 
                                 // alignment: Alignment.topRight,
                                 child: Text(widget.appointmentItem.time,
-                                    style: CustomTextStyle.previewCaseLargeFont(
+                                    style: MyFontStyles.titlesWhiteFontStyle(
                                         context)))
                           ]),
                       Divider(height: 50, color: Colors.white),
@@ -140,7 +148,7 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                         children: <Widget>[
                           Container(
                               child: Text("Description",
-                                  style: CustomTextStyle.previewCaseSmallFont(
+                                  style: MyFontStyles.headlinesGreyFontStyle(
                                       context))),
                         ],
                       ),
@@ -151,7 +159,7 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                                 child: Text(
                                     widget.appointmentItem.description ??
                                         'None',
-                                    style: CustomTextStyle.previewCaseLargeFont(
+                                    style: MyFontStyles.titlesWhiteFontStyle(
                                         context))),
                           ),
                         ],
@@ -173,24 +181,69 @@ class _PreviewAppointmentState extends State<PreviewAppointment> {
                                         new BorderRadius.circular(18.0),
                                     side: BorderSide(color: Colors.white)),
                                 child: Text(
-                                  widget.appointmentItem.taken_by =='N/A'
+                                  widget.appointmentItem.taken_by == 'N/A'
                                       ? 'Assign to me'
                                       : widget.appointmentItem.status == '0'
                                           ? 'Start'
                                           : 'Finish',
-                                  style: CustomTextStyle.buttonsFont(context),
+                                  style: MyFontStyles.buttonsFont(context),
                                 ),
                                 onPressed: () async {
-                         widget.appointmentItem.taken_by == 'N/A'?
-                                  Queries.assignAppointment(widget.appointmentItem.id)
-                                      :widget.appointmentItem.status == '0' ?
-                                      Queries.startAppointment(widget.appointmentItem.id) :
-                                      Queries.finishAppointment(widget.appointmentItem.id);
-
-                                  AppointmentsController.removeFromLocalList(
-                                      widget.appointmentItem.id);
-                                   refreshFromLocalList();
-                                  Navigator.of(context).pop();
+                                  String appointmentId =
+                                      widget.appointmentItem.id;
+                                  String responseText = "N/A";
+                                  if (widget.appointmentItem.taken_by ==
+                                      'N/A') {
+                                    AppointmentsController
+                                        .assignAppointmentInLocalList(
+                                            appointmentId);
+                                    refreshFromLocalList();
+                                    Navigator.of(context).pop();
+                                    responseText =
+                                        await Queries.assignAppointment(
+                                            widget.appointmentItem.id);
+                                    responseText == "success"
+                                        ? showInSnackBar(
+                                            "Appointment assigned successfully")
+                                        : showInSnackBar(
+                                            "Appointment assigning failed, restart application");
+                                  } else if (widget.appointmentItem.status ==
+                                      '0') {
+                                    AppointmentsController
+                                        .startAppointmentInLocalList(
+                                            appointmentId);
+                                    refreshFromLocalList();
+                                    Navigator.of(context).pop();
+                                    responseText =
+                                        await Queries.startAppointment(
+                                            widget.appointmentItem.id);
+                                    responseText == "success"
+                                        ? showInSnackBar(
+                                            "Appointment started successfully")
+                                        : showInSnackBar(
+                                            "Appointment starting failed, restart application");
+                                  } else {
+                                    AppointmentsController
+                                        .finishAppointmentInLocalList(
+                                            appointmentId);
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: (context) => NewCase(
+                                                  doctor: widget.doctor,
+                                                  refreshLocalList:
+                                                      refreshFromLocalList,
+                                                  showInSnackBar:
+                                                      showInSnackBar,
+                                                )));
+                                    responseText =
+                                        await Queries.finishAppointment(
+                                            widget.appointmentItem.id);
+                                    responseText == "success"
+                                        ? showInSnackBar(
+                                            "Appointment finished successfully")
+                                        : showInSnackBar(
+                                            "Appointment finishing failed, restart application");
+                                  }
                                 }),
                           ),
                         ],

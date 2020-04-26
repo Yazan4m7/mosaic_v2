@@ -4,10 +4,10 @@ import 'case_controller.dart';
 import 'package:mosaic/job/Jobs_Controller.dart';
 import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/business/Queries.dart';
-import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/cases/case_model.dart';
 import 'package:mosaic/doctor/doctor.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:mosaic/Utils/Custom_Font_Style.dart';
+import 'package:mosaic/Utils/font_style.dart';
 import 'file:///D:/officalProject%20-%20Copy/mosaic/lib/job/Job.dart';
 import 'package:mosaic/widgets/Widgets.dart';
 
@@ -17,8 +17,14 @@ class PreviewCase extends StatefulWidget {
   final Case caseItem;
   final Doctor doctor;
   final VoidCallback refreshLocalList;
-
-  const PreviewCase({Key key, this.caseItem, this.doctor,this.refreshLocalList}) : super(key: key);
+  final void Function(String msg) showInSnackBar;
+  const PreviewCase(
+      {Key key,
+      this.caseItem,
+      this.doctor,
+      this.refreshLocalList,
+      this.showInSnackBar})
+      : super(key: key);
   @override
   _PreviewCaseState createState() => _PreviewCaseState(refreshLocalList);
 }
@@ -91,16 +97,19 @@ class _PreviewCaseState extends State<PreviewCase> {
                                         MediaQuery.of(context).size.width / 2 -
                                             20,
                                     child: Text("Patient Name",
-                                        style: CustomTextStyle
-                                            .previewCaseSmallFont(context))),
+                                        style:
+                                            MyFontStyles.headlinesGreyFontStyle(
+                                                context))),
                                 Container(
                                     width:
                                         MediaQuery.of(context).size.width / 2 -
                                             20,
                                     alignment: Alignment.topLeft,
-                                    child: Text(widget.caseItem.patientName ?? "N/A",
-                                        style: CustomTextStyle
-                                            .previewCaseLargeFont(context))),
+                                    child: Text(
+                                        widget.caseItem.patientName ?? "N/A",
+                                        style:
+                                            MyFontStyles.titlesWhiteFontStyle(
+                                                context))),
                               ],
                             ),
                             // SizedBox(width: screenAwareSize(10, context)),
@@ -114,15 +123,17 @@ class _PreviewCaseState extends State<PreviewCase> {
                                 children: <Widget>[
                                   Container(
                                       child: Text("Doctor Name",
-                                          style: CustomTextStyle
-                                              .previewCaseSmallFont(context))),
+                                          style: MyFontStyles
+                                              .headlinesGreyFontStyle(
+                                                  context))),
                                   Container(
                                       child: Text(
                                           widget.doctor == null
                                               ? "NA"
                                               : widget.doctor.name,
-                                          style: CustomTextStyle
-                                              .previewCaseLargeFont(context)))
+                                          style:
+                                              MyFontStyles.titlesWhiteFontStyle(
+                                                  context)))
                                 ],
                               ),
                             )
@@ -133,15 +144,17 @@ class _PreviewCaseState extends State<PreviewCase> {
                           children: <Widget>[
                             Container(
                                 child: Text("Delivery Date",
-                                    style: CustomTextStyle.previewCaseSmallFont(
+                                    style: MyFontStyles.headlinesGreyFontStyle(
                                         context))),
                             Container(
 
                                 // alignment: Alignment.topRight,
-                                child: Text(widget.caseItem.deliverDate ==null?  "N/A " :
-                                    widget.caseItem.deliverDate
-                                        .substring(0, 10),
-                                    style: CustomTextStyle.previewCaseLargeFont(
+                                child: Text(
+                                    widget.caseItem.deliverDate == null
+                                        ? "N/A "
+                                        : widget.caseItem.deliverDate
+                                            .substring(0, 10),
+                                    style: MyFontStyles.titlesWhiteFontStyle(
                                         context)))
                           ]),
                       Divider(
@@ -151,7 +164,7 @@ class _PreviewCaseState extends State<PreviewCase> {
                       Row(children: <Widget>[
                         Container(
                             child: Text("Jobs :",
-                                style: CustomTextStyle.previewCaseSmallFont(
+                                style: MyFontStyles.headlinesGreyFontStyle(
                                     context))),
                       ]),
                       Container(
@@ -175,7 +188,10 @@ class _PreviewCaseState extends State<PreviewCase> {
                                                 Colors.white));
                                   }
                                   if (!projectSnap.hasData)
-                                    return Text('No Jobs',style: CustomTextStyle.previewCaseSmallFont(context));
+                                    return Text('No Jobs',
+                                        style:
+                                            MyFontStyles.headlinesGreyFontStyle(
+                                                context));
                                 }
                                 break;
                             }
@@ -204,8 +220,8 @@ class _PreviewCaseState extends State<PreviewCase> {
                                                   JobsController
                                                       .getJobTypeNameById(
                                                           int.parse(job.type)),
-                                              style: CustomTextStyle
-                                                  .previewCaseLargeFont(
+                                              style: MyFontStyles
+                                                  .titlesWhiteFontStyle(
                                                       context)),
                                         ),
 //                                    Container(
@@ -235,7 +251,7 @@ class _PreviewCaseState extends State<PreviewCase> {
                         children: <Widget>[
                           Container(
                               child: Text("Notes",
-                                  style: CustomTextStyle.previewCaseSmallFont(
+                                  style: MyFontStyles.headlinesGreyFontStyle(
                                       context))),
                         ],
                       ),
@@ -243,11 +259,12 @@ class _PreviewCaseState extends State<PreviewCase> {
                         children: <Widget>[
                           Container(
                             child: Flexible(
-                                child: Text(widget.caseItem.note == null
-                                    ? "None"
-                                    : widget.caseItem.note,
-                                style: CustomTextStyle.previewCaseLargeFont(
-                                    context))),
+                                child: Text(
+                                    widget.caseItem.note == null
+                                        ? "None"
+                                        : widget.caseItem.note,
+                                    style: MyFontStyles.titlesWhiteFontStyle(
+                                        context))),
                           ),
                         ],
                       ),
@@ -271,25 +288,42 @@ class _PreviewCaseState extends State<PreviewCase> {
                                   widget.caseItem.madeBy == null
                                       ? 'Start'
                                       : "Finish",
-                                  style: CustomTextStyle.buttonsFont(context),
+                                  style: MyFontStyles.buttonsFont(context),
                                 ),
                                 onPressed: () async {
-                                  widget.caseItem.madeBy == null
-                                      ? Queries.startCase(
-                                          widget.caseItem.id.toString(),
-                                          widget.caseItem.currentStatus,
-                                          "1")
-                                      : Queries.finishCase(
-                                          widget.caseItem.id.toString(),
-                                          widget.caseItem.currentStatus,
-                                          "1");
-
-                                  CasesController.removeFromLocalList(
-                                      widget.caseItem.id);
-                                  refreshLocalList();
-                                  Navigator.of(context).pop();
+                                  String response = "N/A";
+                                  if (widget.caseItem.madeBy == null) {
+                                    CasesController.startCaseInLocalList(
+                                        widget.caseItem.id.toString());
+                                    refreshLocalList();
+                                    Navigator.of(context).pop();
+                                    response = await Queries.startCase(
+                                        widget.caseItem.id.toString(),
+                                        widget.caseItem.currentStatus,
+                                        "1");
+                                    response == "success"
+                                        ? widget.showInSnackBar(
+                                            "Case Started successfully")
+                                        : widget.showInSnackBar(
+                                            "Operation failed, please restart application");
+                                  } else {
+                                    CasesController.finishCaseInLocalList(
+                                        widget.caseItem.id.toString());
+                                    refreshLocalList();
+                                    Navigator.of(context).pop();
+                                    response = await Queries.finishCase(
+                                        widget.caseItem,
+                                        widget.caseItem.currentStatus,
+                                        "1");
+                                    response == "success"
+                                        ? widget.showInSnackBar(
+                                            "Case finished successfully")
+                                        : widget.showInSnackBar(
+                                            "Operation failed, please restart application");
+                                  }
                                 }),
                           ),
+                          _buildRepeatButton()
                         ],
                       ),
                     ]),
@@ -298,6 +332,68 @@ class _PreviewCaseState extends State<PreviewCase> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRepeatButton() {
+    if (widget.caseItem.currentStatus == '4' && widget.caseItem.madeBy != null)
+      return ButtonTheme(
+        minWidth: 200.0,
+        height: 40.0,
+        child: RaisedButton(
+            textColor: Color.fromRGBO(58, 66, 86, 1.0),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(18.0),
+                side: BorderSide(color: Colors.white)),
+            child: Text(
+              'Repeat',
+              style: MyFontStyles.buttonsFont(context),
+            ),
+            onPressed: () async {
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => stageToBeRepeatedToDialog(),
+              ).then((_) => setState(() {}));
+
+            }),
+      );
+    return Container();
+  }
+
+  stageToBeRepeatedToDialog() {
+    return Column(
+      children: <Widget>[
+        RaisedButton(
+          child: Text("Design"),
+          onPressed: () {
+            setState(() {});
+            Navigator.of(context).pop();
+          },
+        ),
+        RaisedButton(
+          child: Text("Milling"),
+          onPressed: () {
+            setState(() {});
+            Navigator.of(context).pop();
+          },
+        ),
+        RaisedButton(
+          child: Text("Furnace"),
+          onPressed: () {
+            setState(() {});
+            Navigator.of(context).pop();
+          },
+        ),
+        RaisedButton(
+          child: Text("Finishing"),
+          onPressed: () {
+            setState(() {});
+            Navigator.of(context).pop();
+          },
+        )
+      ],
     );
   }
 }

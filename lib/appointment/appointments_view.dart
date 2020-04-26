@@ -3,14 +3,17 @@ import 'package:mosaic/appointment/appointments_controller.dart';
 import 'package:mosaic/business/Logger.dart';
 import 'package:mosaic/appointment/appointment_model.dart';
 import 'package:mosaic/doctor/doctor.dart';
+import 'package:mosaic/doctor/doctors_controller.dart';
+import 'package:mosaic/widgets/Widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:mosaic/widgets/Widgets.dart';
-import 'package:mosaic/doctor/doctors_controller.dart';
+import 'package:mosaic/Utils/themes_constans.dart';
+import 'package:mosaic/widgets/decorated_tab_bar.dart';
 void main() => runApp(new AppointmentsMainView());
 
 
 class AppointmentsMainView extends StatelessWidget {
+
   AppointmentsMainView({Key key}) : super(key: key);
   // This widget is the root of your application.
   @override
@@ -19,13 +22,18 @@ class AppointmentsMainView extends StatelessWidget {
       title: 'MOSAIC',
       theme: new ThemeData(
 
-          primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'VIP-Hakm-Regular-2016.ttf'),
+        fontFamily: 'VIP-Hakm-Regular-2016.ttf'),
       home: new AppointmentListPage(title: 'Appointments',key: key),
     );
   }
 }
 
 final key = new GlobalKey<AppointmentListPageState>();
+final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+void showInSnackBar(String value) {
+  _scaffoldKey.currentState
+      .showSnackBar(new SnackBar(content: new Text(value)));
+}
 class AppointmentListPage extends StatefulWidget {
   AppointmentListPage({Key key, this.title}) : super(key: key);
   final String title;
@@ -38,9 +46,7 @@ class AppointmentListPageState extends State<AppointmentListPage>
   Animation<double> animation;
   static Future<List<Appointment>>  appointmentList;
   static TabController _tabController;
-//   GlobalKey<AnimatedListState> _listKey =
-//      new GlobalKey<AnimatedListState>();
-  GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+
   SharedPreferences prefs;
   static HashMap<String,Doctor> doctors = HashMap<String,Doctor>();
 
@@ -61,16 +67,17 @@ class AppointmentListPageState extends State<AppointmentListPage>
     _tabController = new TabController(length: 2, vsync: this);
   }
   refreshLocalList() async {
-    Logger.log("Refrishing list");
-    setState(() {appointmentList=AppointmentsController.getAppointments();});
+
+    setState(() {appointmentList=AppointmentsController.getLocalList();});
   }
   refreshListFromDB() async {
-    Logger.log("Refrishing list");
+
     setState(() {appointmentList=AppointmentsController.getAppointments();});
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
+      key:_scaffoldKey,
       floatingActionButton: FloatingActionButton(
           child:Icon(Icons.add),
           foregroundColor: Color.fromRGBO(58, 66, 86, 1.0),
@@ -78,35 +85,49 @@ class AppointmentListPageState extends State<AppointmentListPage>
           onPressed: () {
             // Add your onPressed code here!
           }),
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+      backgroundColor: ThemeConstants.mainBackground,
       appBar: AppBar(
-        bottom: TabBar(
-          unselectedLabelColor: Colors.white,
-          labelColor: Colors.amber,
-          tabs: [
-            new Tab(
-                child: Text('Active',
+
+        bottom: DecoratedTabBar(
+
+          tabBar: TabBar(
+            indicatorColor:  ThemeConstants.unselectedTabTextColor,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorWeight: 5,
+            controller: _tabController,
+            tabs: [new Tab(
+
+                  child: Text('ACTIVE',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Colors.white))),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,))),
             new Tab(
-              child: Text('Waiting',
+              child: Text('WAITING',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.white)),
+                      fontSize: 18,)),
             ),
-          ],
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorSize: TabBarIndicatorSize.tab,
+            ],
+          ),
+
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: ThemeConstants.selectedTabTextColor,
+                width: 5.0,
+              ),
+            ),
+
+          ),
+
         ),
+
         bottomOpacity: 1,
         automaticallyImplyLeading: false,
         elevation: 0.1,
-        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-        title: Text("Appointments"),
+        backgroundColor: ThemeConstants.topAppBarColor,
+        title: Text("Appointments",style: TextStyle(color: ThemeConstants.titleColor),),
+
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.refresh),
@@ -117,12 +138,11 @@ class AppointmentListPageState extends State<AppointmentListPage>
           IconButton(
             icon: Icon(Icons.list),
             onPressed: () {
-              _drawerKey.currentState.openDrawer();
+              _scaffoldKey.currentState.openDrawer();
             },
           ),
         ],
       ),
-      key: _drawerKey,
       drawer: Widgets.mosaicDrawer(),
       body: TabBarView(
         controller: _tabController,
@@ -132,8 +152,7 @@ class AppointmentListPageState extends State<AppointmentListPage>
               builder: (context, appointmentList) {
                 if (appointmentList.connectionState == ConnectionState.none ||
                     appointmentList.data == null) {
-                  print(
-                      'snapshot data is: ${appointmentList.data} and connecting is ${appointmentList.connectionState}');
+
                   return Container();
                 }
                 print("appointments list length${appointmentList.data.length}");
@@ -147,7 +166,7 @@ class AppointmentListPageState extends State<AppointmentListPage>
                       if (appointment.taken_by == userId.toString() && appointment.status != '2') {
                         return Widgets.makeCard(appointment,
                             DoctorsController.getDoctorById(int.parse(appointment.doctor_id)),
-                            animation, context,()=>refreshLocalList(),);
+                            animation, context,()=>refreshLocalList(),showInSnackBar);
                       }else{return SizedBox(width: 0,height: 0);}
                     });
               }),
@@ -156,8 +175,7 @@ class AppointmentListPageState extends State<AppointmentListPage>
               builder: (context, appointmentList) {
                 if (appointmentList.connectionState == ConnectionState.none ||
                     appointmentList.data == null) {
-                  print(
-                      'snapshot data is: ${appointmentList.data} and connecting is ${appointmentList.connectionState}');
+
                   return Container(child: Text('null'),);
                 }
                 print("appointments list length${appointmentList.data.length}");
@@ -170,7 +188,7 @@ class AppointmentListPageState extends State<AppointmentListPage>
                       if (appointment.taken_by == "N/A") {
                         return Widgets.makeCard(appointment,
                             DoctorsController.getDoctorById(int.parse(appointment.doctor_id)),
-                             animation, context,()=>refreshLocalList(),);
+                             animation, context,()=>refreshLocalList(),showInSnackBar);
                       }else{return SizedBox(width: 0,height: 0);}
                     });
               }),

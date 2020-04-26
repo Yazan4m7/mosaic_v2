@@ -29,7 +29,7 @@ dependencies:
   flutter_multiselect: 0.0.1
   flutter_downloader: ^1.4.1
   share_extend: ^1.0.9
-  dio: 2.1.7
+  dio: ^3.0.9
   rflutter_alert: ^1.0.3
   flip_card: ^0.4.4
   flutter_slidable: ^0.5.4

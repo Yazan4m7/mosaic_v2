@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:mosaic/business/Logger.dart';
 import 'case_controller.dart';
-import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/cases/case_model.dart';
 import 'package:mosaic/doctor/doctor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class CasesMainView extends StatelessWidget {
       title: 'MOSAIC',
       theme: new ThemeData(
 
-          primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'VIP-Hakm-Regular-2016.ttf'),
+          primaryColor: Color.fromRGBO(33, 44, 22, 1.0), fontFamily: 'VIP-Hakm-Regular-2016.ttf'),
       home: new ListPage(title: 'Appointments',key: key),
     );
   }
@@ -41,7 +41,7 @@ class ListPageState extends State<ListPage>
   static TabController _tabController;
 //   GlobalKey<AnimatedListState> _listKey =
 //      new GlobalKey<AnimatedListState>();
-   GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+
   SharedPreferences prefs;
   static HashMap<String,Doctor> doctors = HashMap<String,Doctor>();
 
@@ -52,6 +52,11 @@ class ListPageState extends State<ListPage>
   static setDoctorsList(HashMap<String,Doctor> doctorsList) async {
     doctors = doctorsList;
   }
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
+  }
 
   @override
   void initState() {
@@ -61,16 +66,17 @@ class ListPageState extends State<ListPage>
     _tabController = new TabController(length: 2, vsync: this);
   }
    refreshLocalList() async {
-     Logger.log("Refrishing list");
+
      setState(() {casesList=CasesController.getLocalList();});
    }
   refreshListFromDB() async {
-    Logger.log("Refrishing list");
+
     setState(() {casesList=CasesController.getCases();});
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
+      key:_scaffoldKey,
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       appBar: AppBar(
         bottom: TabBar(
@@ -110,12 +116,12 @@ class ListPageState extends State<ListPage>
           IconButton(
             icon: Icon(Icons.list),
             onPressed: () {
-              _drawerKey.currentState.openDrawer();
+              _scaffoldKey.currentState.openDrawer();
             },
           ),
         ],
       ),
-      key: _drawerKey,
+
       drawer: Widgets.mosaicDrawer(),
       body: TabBarView(
         controller: _tabController,
@@ -129,18 +135,17 @@ class ListPageState extends State<ListPage>
                       'snapshot data is: ${casesList.data} and connecting is ${casesList.connectionState}');
                   return Container();
                 }
-                print("cases list length${casesList.data.length}");
                 return AnimatedList(
                     scrollDirection: Axis.vertical,
                     initialItemCount: casesList.data.length,
                     //key: _listKey,
                     itemBuilder: (context, index, animation) {
-                      print("doctor id is  ${casesList.data[index].toString()}");
+
                       if (isActive(casesList.data[index])) {
                         return Widgets.makeCard(
                             casesList.data[index],
                             DoctorsController.getDoctorById(
-                            int.parse(casesList.data[index].doctorId)), animation, context,()=> refreshLocalList());
+                            int.parse(casesList.data[index].doctorId)), animation, context,()=> refreshLocalList(),showInSnackBar);
                       }else{return SizedBox(width: 0,height: 0);}
                     });
               }),
@@ -164,7 +169,7 @@ class ListPageState extends State<ListPage>
                         return Widgets.makeCard(
                             casesList.data[index],
                             DoctorsController.getDoctorById(
-                                int.parse(casesList.data[index].doctorId)), animation, context,refreshLocalList);
+                                int.parse(casesList.data[index].doctorId)), animation, context,refreshLocalList,showInSnackBar);
                       }else{return SizedBox(width: 0,height: 0);}
                     });
               })
@@ -176,7 +181,7 @@ class ListPageState extends State<ListPage>
   }
   bool isActive(Case caseItem){
 
-    if(caseItem.madeBy != null && int.parse(caseItem.madeBy)!=0)return true;
+    if(caseItem.madeBy != null )return true;
      return false;
   }
 }

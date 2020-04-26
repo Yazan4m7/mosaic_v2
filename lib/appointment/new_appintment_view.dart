@@ -1,60 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mosaic/Utils/font_style.dart';
+import 'package:mosaic/Utils/dataSearch.dart';
+import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/appointment/appointments_controller.dart';
 import 'package:mosaic/business/Queries.dart';
-import 'appointment_model.dart';
-import 'package:mosaic/Utils/utils.dart';
 import 'package:mosaic/doctor/doctor.dart';
-import 'package:mosaic/Utils/Custom_Font_Style.dart';
+import 'package:mosaic/doctor/doctors_controller.dart';
+
+import 'appointment_model.dart';
 import 'appointments_view.dart';
 
+final TextEditingController doctorNameController = TextEditingController();
+final TextEditingController descriptionFieldController =
+    TextEditingController();
 
-void main() => runApp(new AddPreviewAppointment());
-
-class AddPreviewAppointment extends StatefulWidget {
-  final Appointment newAppointmentItem;
-  final Doctor doctor;
-  final VoidCallback refreshFromLocalList;
-
-  const PreviewAppointment({Key key, this.newAppointmentItem, this.doctor,this.refreshFromLocalList})
+class NewAppointment extends StatefulWidget {
+  final String time;
+  final String date;
+  final String cameraId;
+  final VoidCallback refreshLocalList;
+  final void Function(String msg) showInSnackBar;
+  const NewAppointment(
+      {Key key,
+      this.time,
+      this.date,
+      this.cameraId,
+      this.refreshLocalList,
+      this.showInSnackBar})
       : super(key: key);
   @override
-  _PreviewAppointmentState createState() => _PreviewAppointmentState(this.refreshFromLocalList);
+  _NewAppointmentState createState() => _NewAppointmentState();
 }
 
-class _PreviewAppointmentState extends State<AddPreviewAppointment> {
-  VoidCallback refreshFromLocalList;
-  _PreviewAppointmentState(this.refreshFromLocalList);
-  Future jobs;
-  void initState() {
-    super.initState();
-  }
-
+class _NewAppointmentState extends State<NewAppointment> {
+  Doctor doctor = Doctor();
+  _NewAppointmentState();
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MOSAIC',
-      theme: new ThemeData(
-        primaryColor: Color.fromRGBO(58, 66, 86, 1.0),
-
-      ),
       home: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(colors: [
-              Color.fromRGBO(58, 66, 86, 1.0),
-              Color.fromRGBO(30, 38, 58, 15.0)
-            ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+          Color.fromRGBO(58, 66, 86, 1.0),
+          Color.fromRGBO(30, 38, 58, 15.0)
+        ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Case info',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: screenAwareSize(20, context))),
+            title: Text('New Appointment',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                size: screenAwareSize(25.0, context),
+                size: 25.0,
                 color: Colors.white,
               ),
               onPressed: () {
@@ -69,70 +70,83 @@ class _PreviewAppointmentState extends State<AddPreviewAppointment> {
               child: Align(
                 alignment: Alignment.topRight,
                 child: Column(
-                  //crossAxisAlignment: CrossAxisAlignment.start,
+                    //crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                Container(
-                                    width:
-                                    MediaQuery.of(context).size.width / 2 -
-                                        20,
-                                    child: Text("Doctor Name",
-                                        style: CustomTextStyle
-                                            .previewCaseSmallFont(context))),
-                                Container(
-                                    width:
-                                    MediaQuery.of(context).size.width / 2 -
-                                        20,
-                                    alignment: Alignment.topLeft,
-                                    child: Text(widget.doctor.name?? "N/A",
-                                        style: CustomTextStyle
-                                            .previewCaseLargeFont(context))),
-                              ],
-                            ),
-                            // SizedBox(width: screenAwareSize(10, context)),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                  alignment: Alignment.topLeft,
+                                  child: Text("Doctor name ",
+                                      style:
+                                          MyFontStyles.headlinesGreyFontStyle(
+                                              context))),
+                              Container(
+                                alignment: Alignment.topLeft,
+                                // gesture detector instead of icon button because it has padding
+                                child: GestureDetector(
+                                  child: Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                    size: 25,
+                                  ),
+                                  onTap: () {
+                                    showSearch(
+                                        context: context,
+                                        delegate:
+                                            DataSearch(doctorNameController));
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width / 2 - 20,
+                            alignment: Alignment.topLeft,
+                            child: Text(doctorNameController.text,
+                                style:
+                                    MyFontStyles.titlesWhiteFontStyle(context)),
+                          )
+                        ],
+                      ),
+                      // SizedBox(width: screenAwareSize(10, context)),
 //                          SizedBox(
 //                            width: screenAwareSize(30, context),
 //                          ),
+                      SizedBox(height: MediaQuery.of(context).size.height / 30),
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
                             Container(
-                              width: MediaQuery.of(context).size.width / 2 - 20,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: <Widget>[
-                                  Container(
-                                      alignment: Alignment.topLeft,
-                                      child: Text("Date",
-                                          style: CustomTextStyle
-                                              .previewCaseSmallFont(context))),
-                                  Container(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-
-                                          widget.doctor == null
-                                              ? "NA"
-                                              : widget.appointmentItem.date,
-                                          style: CustomTextStyle
-                                              .previewCaseLargeFont(context)))
-                                ],
-                              ),
-                            )
-                          ]),
-                      SizedBox(height: screenAwareSize(10, context)),
+                                alignment: Alignment.topLeft,
+                                child: Text("Date",
+                                    style: MyFontStyles.headlinesGreyFontStyle(
+                                        context))),
+                            Container(
+                                alignment: Alignment.topLeft,
+                                child: Text(widget.date ?? "N/A",
+                                    style: MyFontStyles.titlesWhiteFontStyle(
+                                        context)))
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: MediaQuery.of(context).size.height / 30),
                       Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Container(
                                 child: Text("Time",
-                                    style: CustomTextStyle.previewCaseSmallFont(
+                                    style: MyFontStyles.headlinesGreyFontStyle(
                                         context))),
                             Container(
 
-                              // alignment: Alignment.topRight,
-                                child: Text(widget.appointmentItem.time,
-                                    style: CustomTextStyle.previewCaseLargeFont(
+                                // alignment: Alignment.topRight,
+                                child: Text(widget.time ?? "N/A",
+                                    style: MyFontStyles.titlesWhiteFontStyle(
                                         context)))
                           ]),
                       Divider(height: 50, color: Colors.white),
@@ -140,19 +154,31 @@ class _PreviewAppointmentState extends State<AddPreviewAppointment> {
                         children: <Widget>[
                           Container(
                               child: Text("Description",
-                                  style: CustomTextStyle.previewCaseSmallFont(
+                                  style: MyFontStyles.headlinesGreyFontStyle(
                                       context))),
                         ],
+                      ),
+                      SizedBox(
+                        height: screenAwareSize(5, context),
                       ),
                       Row(
                         children: <Widget>[
                           Container(
                             child: Flexible(
-                                child: Text(
-                                    widget.appointmentItem.description ??
-                                        'None',
-                                    style: CustomTextStyle.previewCaseLargeFont(
-                                        context))),
+                                child: TextField(
+                                    controller: descriptionFieldController,
+                                    style: MyFontStyles.titlesWhiteFontStyle(
+                                        context),
+                                    decoration: new InputDecoration(
+                                      enabledBorder: const OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.grey, width: 2.0),
+                                      ),
+                                      hintText: 'Enter Description',
+                                      hintStyle: MyFontStyles
+                                          .textFieldsInsideHintsStyle(context),
+                                      border: new OutlineInputBorder(),
+                                    ))),
                           ),
                         ],
                       ),
@@ -170,27 +196,36 @@ class _PreviewAppointmentState extends State<AddPreviewAppointment> {
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
                                     borderRadius:
-                                    new BorderRadius.circular(18.0),
+                                        new BorderRadius.circular(18.0),
                                     side: BorderSide(color: Colors.white)),
                                 child: Text(
-                                  widget.appointmentItem.taken_by =='N/A'
-                                      ? 'Assign to me'
-                                      : widget.appointmentItem.status == '0'
-                                      ? 'Start'
-                                      : 'Finish',
-                                  style: CustomTextStyle.buttonsFont(context),
+                                  "Submit",
                                 ),
                                 onPressed: () async {
-                                  widget.appointmentItem.taken_by == 'N/A'?
-                                  Queries.assignAppointment(widget.appointmentItem.id)
-                                      :widget.appointmentItem.status == '0' ?
-                                  Queries.startAppointment(widget.appointmentItem.id) :
-                                  Queries.finishAppointment(widget.appointmentItem.id);
+                                  //
+                                  Appointment newAppointmet = Appointment(
+                                      doctor_id:
+                                          DoctorsController.getDoctorIdByName(
+                                              doctorNameController.text),
+                                      date: widget.date,
+                                      time: widget.time,
+                                      description:
+                                          descriptionFieldController.text,
+                                      camera_id: widget.cameraId);
+                                  AppointmentsController.addToLocalList(
+                                      newAppointmet);
 
-                                  AppointmentsController.removeFromLocalList(
-                                      widget.appointmentItem.id);
-                                  refreshFromLocalList();
                                   Navigator.of(context).pop();
+                                  widget.refreshLocalList();
+                                  String response = await Queries.createAppointment(
+                                      doctorNameController.text,
+                                      widget.date,
+                                      widget.time,
+                                      descriptionFieldController.text,
+                                      widget.cameraId);
+                                  response == "success" ?
+                                  widget.showInSnackBar("Appointment created successfully"):
+                                  widget.showInSnackBar("Appointment creation failed, restart application");
                                 }),
                           ),
                         ],
@@ -202,5 +237,9 @@ class _PreviewAppointmentState extends State<AddPreviewAppointment> {
         ),
       ),
     );
+  }
+
+  void initState() {
+    super.initState();
   }
 }

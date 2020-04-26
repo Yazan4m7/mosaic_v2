@@ -4,12 +4,13 @@ import 'package:mosaic/doctor/doctors_controller.dart';
 import '../business/Constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../business/Logger.dart';
-import 'package:mosaic/cases/Case.dart';
+import 'package:mosaic/cases/case_model.dart';
 import 'package:http/http.dart' as http;
 
 
 
 class CasesController {
+
   static const ROOT = Constants.ROOT;
   static List<int> requiredDoctorsIds= List<int>();
   static List<Case> LocalCaseslist= List<Case>();
@@ -19,11 +20,10 @@ class CasesController {
     var map = Map<String, dynamic>();
     map['action'] = "GET";
     map['query'] =
-    "SELECT * from orders WHERE current_status in (0,1,2,3,4,5) ORDER BY id DESC";
+    "SELECT * from orders WHERE current_status in (0,1,3,4,5) ORDER BY id DESC";
     print(map['query']);
     final response = await http.post(ROOT, body: map);
 
-    print('get all cases body: ${response.body}');
 
     LocalCaseslist.clear();
     var parsed = json.decode(response.body);
@@ -34,11 +34,21 @@ class CasesController {
     }
     DoctorsController.setIdsList(requiredDoctorsIds);
     await DoctorsController.fetchDoctors();
-    print("returning cases list");
+
     return LocalCaseslist;
   }
   static  void removeFromLocalList(String id) async {
     LocalCaseslist.removeWhere((element) => element.id == id);
+  }
+  static  void startCaseInLocalList(String id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    LocalCaseslist.firstWhere((element) => element.id == id).madeBy=prefs.getString('userId');
+  }
+  static  void finishCaseInLocalList(String id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Case caseItem = LocalCaseslist.firstWhere((element) => element.id == id);
+    caseItem.madeBy=null;
+    caseItem.currentStatus =(int.parse(caseItem.currentStatus)+1).toString();
   }
   static  Future<List<Case>> getLocalList() async{
     return LocalCaseslist;

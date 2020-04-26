@@ -15,11 +15,10 @@ class JobsController {
 
   static fetchJobsByCaseId(caseId) async {
 
-    print("Getting jobs of case : $caseId");
     var map = Map<String, dynamic>();
     map['action'] = 'GET';
     map['query'] = "SELECT * from jobs WHERE order_id='$caseId'";
-    print("jobs query : ${map['query']}");
+
     final getJobsResponse = await http.post(ROOT, body: map);
     try {
       var parsed = json.decode(getJobsResponse.body);
@@ -49,7 +48,7 @@ class JobsController {
     var map = Map<String, dynamic>();
     map['action'] = 'GET';
     map['query'] = "SELECT * from job_types;";
-    print("jobs query : ${map['query']}");
+
     final getJobTypesResponse = await http.post(ROOT, body: map);
     var parsed = json.decode(getJobTypesResponse.body);
 
